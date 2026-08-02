@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { store } from '../database/db';
+import { store, formatDateDisplay } from '../database/db';
 import { useEmployeeSalary } from '../hooks/useSalary';
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import Layout from '../components/Layout';
@@ -141,7 +141,7 @@ export default function EmployeeDetails() {
               </div>
               <div className="flex items-center text-xs text-zinc-400 mt-1 space-x-1.5">
                 <Calendar className="w-3.5 h-3.5 text-zinc-500" />
-                <span>Joined {employee.joiningDate}</span>
+                <span>Joined {formatDateDisplay(employee.joiningDate)}</span>
               </div>
             </div>
             <button
@@ -227,7 +227,7 @@ export default function EmployeeDetails() {
               {attendance.length > 0 ? (
                 attendance.map((att) => (
                   <div key={att.id} className="p-2.5 flex flex-col justify-between space-y-1">
-                    <span className="text-[10px] font-extrabold text-white">{att.date}</span>
+                    <span className="text-[10px] font-extrabold text-white">{formatDateDisplay(att.date)}</span>
                     <div className="flex justify-between items-center">
                       <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${attendanceColorClass(att.value)}`}>
                         {attendanceLabel(att.value)}
@@ -252,7 +252,7 @@ export default function EmployeeDetails() {
                 payments.map((p) => (
                   <div key={p.id} className="p-2.5 flex flex-col justify-between space-y-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-extrabold text-white">{p.paymentDate}</span>
+                      <span className="text-[10px] font-extrabold text-white">{formatDateDisplay(p.paymentDate)}</span>
                       <span className="text-[10px] font-extrabold text-brand-success">₹{p.amount}</span>
                     </div>
                     <div className="text-[8px] font-bold text-zinc-500 truncate uppercase">

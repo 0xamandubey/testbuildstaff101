@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { store } from '../database/db';
+import { store, formatDateDisplay } from '../database/db';
 import type { Employee } from '../database/db';
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import Layout from '../components/Layout';
@@ -201,7 +201,7 @@ export default function Staff() {
                       </div>
                       <div className="flex flex-col text-xs text-zinc-400 mt-1 space-y-0.5">
                         <span>Wage: ₹{emp.dailyWage}/day</span>
-                        <span>Joined: {emp.joiningDate}</span>
+                        <span>Joined: {formatDateDisplay(emp.joiningDate)}</span>
                       </div>
                     </div>
 

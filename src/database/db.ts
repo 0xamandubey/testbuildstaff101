@@ -48,6 +48,17 @@ export interface Settings {
   businessName: string;
 }
 
+// ---- Formatting Helpers ----
+export function formatDateDisplay(dateStr?: string): string {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    const [year, month, day] = parts;
+    return `${day}/${month}/${year}`;
+  }
+  return dateStr;
+}
+
 // ---- Safe Storage Helpers ----
 
 const memoryStorage: Record<string, string> = {};

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { store } from '../database/db';
+import { store, formatDateDisplay } from '../database/db';
 import type { Employee } from '../database/db';
 import { useEmployeeSalary } from '../hooks/useSalary';
 import { useForceUpdate } from '../hooks/useForceUpdate';
@@ -151,7 +151,7 @@ export default function HistoryPage() {
       id: p.id,
       employeeId: p.employeeId,
       employeeName: employeeMap.get(p.employeeId)?.name || 'Deleted Employee',
-      paymentDate: p.paymentDate,
+      paymentDate: formatDateDisplay(p.paymentDate),
       amount: p.amount,
       paymentMethod: p.paymentMethod,
       remarks: p.remarks,

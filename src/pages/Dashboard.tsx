@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { store } from '../database/db';
+import { store, formatDateDisplay } from '../database/db';
 import type { Employee } from '../database/db';
 import { useAllSalaries } from '../hooks/useSalary';
 import { useForceUpdate } from '../hooks/useForceUpdate';
@@ -166,7 +166,7 @@ export default function Dashboard() {
           <div className="bg-brand-darkGray rounded-2xl border border-zinc-800 shadow-sm divide-y divide-zinc-800 overflow-hidden">
             <div className="p-3 bg-brand-black flex justify-between items-center border-b border-zinc-800">
               <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Date</span>
-              <span className="text-xs font-bold text-zinc-300">{format(new Date(), 'dd MMMM yyyy')}</span>
+              <span className="text-xs font-bold text-zinc-300">{format(new Date(), 'dd/MM/yyyy')}</span>
             </div>
 
             {recentAttendance.length > 0 ? (
@@ -179,7 +179,7 @@ export default function Dashboard() {
                   <div className="min-w-0 pr-2">
                     <div className="text-xs font-bold text-white truncate">{log.employeeName}</div>
                     <div className="text-[9px] uppercase tracking-wider text-zinc-500 mt-0.5">
-                      Marked on {log.date}
+                      Marked on {formatDateDisplay(log.date)}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 flex-shrink-0">
@@ -212,7 +212,7 @@ export default function Dashboard() {
                   <div className="min-w-0 pr-2">
                     <div className="text-xs font-bold text-white truncate">{pay.employeeName}</div>
                     <div className="text-[9px] uppercase tracking-wider text-zinc-500 mt-0.5">
-                      {pay.paymentDate} • {pay.paymentMethod} {pay.remarks ? `• ${pay.remarks}` : ''}
+                      {formatDateDisplay(pay.paymentDate)} • {pay.paymentMethod} {pay.remarks ? `• ${pay.remarks}` : ''}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 flex-shrink-0">

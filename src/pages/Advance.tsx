@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { store } from '../database/db';
+import { store, formatDateDisplay } from '../database/db';
 import type { Advance as AdvanceType } from '../database/db';
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import Layout from '../components/Layout';
@@ -179,7 +179,7 @@ export default function Advance() {
                     <div>
                       <h3 className="font-bold text-sm text-white">{adv.name}</h3>
                       <div className="flex items-center text-xs text-zinc-400 mt-0.5 space-x-2">
-                        <span>Given: {adv.dateGiven}</span>
+                        <span>Given: {formatDateDisplay(adv.dateGiven)}</span>
                         {adv.phone && (
                           <>
                             <span>•</span>
@@ -215,7 +215,7 @@ export default function Advance() {
                           <div key={i} className="flex justify-between items-center py-1 text-[10px] text-zinc-300">
                             <span className="flex items-center space-x-1">
                               <Calendar className="w-3 h-3 text-zinc-500" />
-                              <span>{r.date}</span>
+                              <span>{formatDateDisplay(r.date)}</span>
                             </span>
                             <span className="font-bold text-brand-success">+ ₹{r.amount}</span>
                           </div>
@@ -227,7 +227,7 @@ export default function Advance() {
                   {/* Status Badge */}
                   {adv.status === 'returned' && adv.dateReturned && (
                     <div className="text-[9px] font-extrabold uppercase px-2 py-1 rounded border text-brand-success bg-green-950/30 border-green-900 w-fit">
-                      Fully Settled on {adv.dateReturned}
+                      Fully Settled on {formatDateDisplay(adv.dateReturned)}
                     </div>
                   )}
 
@@ -346,7 +346,7 @@ export default function Advance() {
                 ₹ {(selectedAdvance.amount - (selectedAdvance.paidBack || 0)).toLocaleString('en-IN')} pending
               </div>
               <div className="text-[9px] text-zinc-405 uppercase tracking-wider">
-                Total Given: ₹ {selectedAdvance.amount.toLocaleString('en-IN')} on {selectedAdvance.dateGiven}
+                Total Given: ₹ {selectedAdvance.amount.toLocaleString('en-IN')} on {formatDateDisplay(selectedAdvance.dateGiven)}
               </div>
             </div>
 
