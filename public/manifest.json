@@ -1,0 +1,17 @@
+{
+  "short_name": "Attendance",
+  "name": "Staff Attendance & Wage Tracker",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#F5F5F5",
+  "theme_color": "#111111",
+  "display": "standalone",
+  "orientation": "portrait"
+}

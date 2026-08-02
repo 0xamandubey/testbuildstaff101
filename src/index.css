@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-black text-brand-lightGray antialiased font-sans select-none overflow-x-hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Large touch targets rules */
+  button, a, input, select {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Custom helpers for smooth UI */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
