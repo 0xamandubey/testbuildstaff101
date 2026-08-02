@@ -55,15 +55,20 @@ export default function Dashboard() {
     }));
 
   const handleAddStaff = (data: { name: string; phone?: string; dailyWage: number; joiningDate: string; status: 'active' | 'archived' }) => {
-    store.addEmployee({
-      name: data.name.trim(),
-      phone: data.phone?.trim() || undefined,
-      dailyWage: Number(data.dailyWage),
-      joiningDate: data.joiningDate,
-      status: 'active',
-    });
-    setIsAddStaffOpen(false);
-    refresh();
+    try {
+      store.addEmployee({
+        name: data.name.trim(),
+        phone: data.phone?.trim() || undefined,
+        dailyWage: Number(data.dailyWage),
+        joiningDate: data.joiningDate,
+        status: 'active',
+      });
+      setIsAddStaffOpen(false);
+      refresh();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add employee: ' + (err as Error).message);
+    }
   };
 
   const attendanceLabel = (val: number) => {

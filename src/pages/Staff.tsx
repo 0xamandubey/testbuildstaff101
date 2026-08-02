@@ -44,16 +44,21 @@ export default function Staff() {
     joiningDate: string;
     status: 'active' | 'archived';
   }) => {
-    store.addEmployee({
-      name: data.name.trim(),
-      phone: data.phone?.trim() || undefined,
-      dailyWage: Number(data.dailyWage),
-      joiningDate: data.joiningDate,
-      status: 'active',
-    });
-    setIsAddOpen(false);
-    showToast('Staff added successfully!');
-    refresh();
+    try {
+      store.addEmployee({
+        name: data.name.trim(),
+        phone: data.phone?.trim() || undefined,
+        dailyWage: Number(data.dailyWage),
+        joiningDate: data.joiningDate,
+        status: 'active',
+      });
+      setIsAddOpen(false);
+      showToast('Staff added successfully!');
+      refresh();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add employee: ' + (err as Error).message);
+    }
   };
 
   const handleEditSubmit = (data: {
@@ -64,16 +69,21 @@ export default function Staff() {
     status: 'active' | 'archived';
   }) => {
     if (!editingEmployee) return;
-    store.updateEmployee(editingEmployee.id, {
-      name: data.name.trim(),
-      phone: data.phone?.trim() || undefined,
-      dailyWage: Number(data.dailyWage),
-      joiningDate: data.joiningDate,
-      status: data.status,
-    });
-    setEditingEmployee(null);
-    showToast('Staff profile updated!');
-    refresh();
+    try {
+      store.updateEmployee(editingEmployee.id, {
+        name: data.name.trim(),
+        phone: data.phone?.trim() || undefined,
+        dailyWage: Number(data.dailyWage),
+        joiningDate: data.joiningDate,
+        status: data.status,
+      });
+      setEditingEmployee(null);
+      showToast('Staff profile updated!');
+      refresh();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update employee: ' + (err as Error).message);
+    }
   };
 
   const handleToggleArchive = (emp: Employee) => {

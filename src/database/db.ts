@@ -1,5 +1,5 @@
-// Simple localStorage-based store. No IndexedDB, no Dexie, no complexity.
-// Data is stored as JSON strings in localStorage.
+// Simple localStorage-based store with safe in-memory fallback.
+// Data is stored as JSON strings in localStorage. If blocked, fallbacks to memory.
 
 export interface Employee {
   id: number;
@@ -48,18 +48,36 @@ export interface Settings {
   businessName: string;
 }
 
-// ---- helpers ----
+// ---- Safe Storage Helpers ----
+
+const memoryStorage: Record<string, string> = {};
+
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return memoryStorage[key] || null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    memoryStorage[key] = value;
+  }
+}
 
 function load<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = safeGetItem(key);
     if (raw) return JSON.parse(raw) as T;
   } catch { /* corrupted data, reset */ }
   return fallback;
 }
 
 function save<T>(key: string, data: T): void {
-  localStorage.setItem(key, JSON.stringify(data));
+  safeSetItem(key, JSON.stringify(data));
 }
 
 // ---- storage keys ----
