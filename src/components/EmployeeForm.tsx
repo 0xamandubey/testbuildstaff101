@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { Employee } from '../database/db';
@@ -7,9 +7,16 @@ import { format } from 'date-fns';
 const employeeSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name is too long'),
   phone: z.string().optional().or(z.literal('')),
-  dailyWage: z.number({ message: 'Daily wage must be a number' }).min(1, 'Wage must be at least 1'),
-  joiningDate: z.string().min(10, 'Joining date is required'),
-  status: z.enum(['active', 'archived']),
+  dailyWage: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number({ invalid_type_error: 'Daily wage must be a number' }).min(1, 'Wage must be at least 1')
+  ),
+  joiningDate: z.string().min(1, 'Joining date is required'),
+  status: z.enum(['active', 'archived']).default('active'),
 });
 
 type EmployeeFormValues = z.infer<typeof employeeSchema>;
@@ -38,8 +45,19 @@ export default function EmployeeForm({ initialData, onSubmit, onCancel }: Employ
     defaultValues,
   });
 
+  const onInvalid = (formErrors: any) => {
+    console.error("Form validation failed:", formErrors);
+    const messages = Object.entries(formErrors)
+      .map(([field, err]: [string, any]) => {
+        const label = field === 'dailyWage' ? 'Daily Wage' : field === 'joiningDate' ? 'Joining Date' : field;
+        return `${label}: ${err.message}`;
+      })
+      .join('\n');
+    alert(`Please fix the following errors:\n${messages}`);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 text-brand-lightGray">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-5 text-brand-lightGray">
       {/* Name */}
       <div className="flex flex-col space-y-1">
         <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -79,10 +97,10 @@ export default function EmployeeForm({ initialData, onSubmit, onCancel }: Employ
       {/* Daily Wage */}
       <div className="flex flex-col space-y-1">
         <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-          Daily Wage (₹/$) <span className="text-brand-danger">*</span>
+          Daily Wage (₹) <span className="text-brand-danger">*</span>
         </label>
         <input
-          {...register('dailyWage', { valueAsNumber: true })}
+          {...register('dailyWage')}
           type="number"
           step="any"
           placeholder="e.g. 500"
