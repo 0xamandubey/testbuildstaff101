@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { store } from '../database/db';
+import { store, checkStorageSupport } from '../database/db';
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import Layout from '../components/Layout';
 import Modal from '../components/Modal';
@@ -18,6 +18,7 @@ export default function Settings() {
   const [bName, setBName] = useState(settings.businessName);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const storageStatus = checkStorageSupport();
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToastMessage({ text, type });
@@ -95,6 +96,22 @@ export default function Settings() {
   return (
     <Layout>
       <div className="space-y-6 text-brand-lightGray">
+        {/* Storage Diagnostics Alert */}
+        {!storageStatus.persistent && (
+          <div className="bg-brand-danger/10 border border-brand-danger/30 p-4 rounded-2xl flex flex-col space-y-2 shadow-sm text-brand-lightGray">
+            <div className="flex items-center space-x-2 text-brand-danger font-bold text-xs uppercase tracking-wider">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <span>Data Loss Risk Detected</span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              {storageStatus.reason === 'blocked' ? (
+                <>Your browser is currently blocking local storage. Any registered staff or records will be <strong>erased completely</strong> when you close or refresh this tab. Please enable cookies and local storage in your browser settings to keep your data.</>
+              ) : (
+                <>You have opened this app directly from a local folder (<code>file://</code> protocol). Modern web browsers <strong>do not save data</strong> across sessions in this mode. Please run the app using a local development server (like <code>npm run dev</code>) or host it on a web server to save your records.</>
+              )}
+            </p>
+          </div>
+        )}
         {/* Toast */}
         {toastMessage && (
           <div

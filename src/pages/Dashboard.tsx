@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { store, formatDateDisplay } from '../database/db';
+import { store, formatDateDisplay, checkStorageSupport } from '../database/db';
 import type { Employee } from '../database/db';
 import { useAllSalaries } from '../hooks/useSalary';
 import { useForceUpdate } from '../hooks/useForceUpdate';
@@ -8,7 +8,7 @@ import Layout from '../components/Layout';
 import Modal from '../components/Modal';
 import EmployeeForm from '../components/EmployeeForm';
 import { format } from 'date-fns';
-import { UserPlus, CalendarCheck, Wallet, ChevronRight, Activity } from 'lucide-react';
+import { UserPlus, CalendarCheck, Wallet, ChevronRight, Activity, AlertTriangle } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const { globalTotalDue } = useAllSalaries();
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const storageStatus = checkStorageSupport();
 
   // Get stats
   const allEmployees = store.getEmployees();
@@ -92,6 +93,22 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Storage Diagnostics Alert */}
+        {!storageStatus.persistent && (
+          <div className="bg-brand-danger/10 border border-brand-danger/30 p-4 rounded-2xl flex flex-col space-y-2 shadow-sm text-brand-lightGray">
+            <div className="flex items-center space-x-2 text-brand-danger font-bold text-xs uppercase tracking-wider">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <span>Data Loss Risk Detected</span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              {storageStatus.reason === 'blocked' ? (
+                <>Your browser is currently blocking local storage. Any registered staff or records will be <strong>erased completely</strong> when you close or refresh this tab. Please enable cookies and local storage in your browser settings to keep your data.</>
+              ) : (
+                <>You have opened this app directly from a local folder (<code>file://</code> protocol). Modern web browsers <strong>do not save data</strong> across sessions in this mode. Please run the app using a local development server (like <code>npm run dev</code>) or host it on a web server to save your records.</>
+              )}
+            </p>
+          </div>
+        )}
         {/* KPI Grid */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-brand-darkGray p-4 rounded-2xl border border-zinc-800 shadow-sm flex flex-col justify-between h-[100px]">

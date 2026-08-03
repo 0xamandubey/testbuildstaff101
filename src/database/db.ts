@@ -61,22 +61,52 @@ export function formatDateDisplay(dateStr?: string): string {
 
 // ---- Safe Storage Helpers ----
 
+let isLocalStorageAvailable = false;
+try {
+  const testKey = '__storage_test__';
+  localStorage.setItem(testKey, testKey);
+  const retrieved = localStorage.getItem(testKey);
+  localStorage.removeItem(testKey);
+  isLocalStorageAvailable = (retrieved === testKey);
+} catch {
+  isLocalStorageAvailable = false;
+}
+
+export function checkStorageSupport() {
+  const isFile = typeof window !== 'undefined' && window.location.protocol === 'file:';
+  return {
+    supported: isLocalStorageAvailable,
+    persistent: isLocalStorageAvailable && !isFile,
+    isFileProtocol: isFile,
+    reason: !isLocalStorageAvailable
+      ? 'blocked' as const
+      : (isFile ? 'fileProtocol' as const : undefined)
+  };
+}
+
 const memoryStorage: Record<string, string> = {};
 
 function safeGetItem(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return memoryStorage[key] || null;
+  if (isLocalStorageAvailable) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      // Fallback
+    }
   }
+  return memoryStorage[key] || null;
 }
 
 function safeSetItem(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    memoryStorage[key] = value;
+  if (isLocalStorageAvailable) {
+    try {
+      localStorage.setItem(key, value);
+      return;
+    } catch {
+      // Fallback
+    }
   }
+  memoryStorage[key] = value;
 }
 
 function load<T>(key: string, fallback: T): T {
