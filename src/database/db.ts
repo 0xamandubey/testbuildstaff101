@@ -78,10 +78,34 @@ export function checkStorageSupport() {
     supported: isLocalStorageAvailable,
     persistent: isLocalStorageAvailable && !isFile,
     isFileProtocol: isFile,
-    reason: !isLocalStorageAvailable
-      ? 'blocked' as const
-      : (isFile ? 'fileProtocol' as const : undefined)
+    reason: isFile
+      ? 'fileProtocol' as const
+      : (!isLocalStorageAvailable ? 'blocked' as const : undefined)
   };
+}
+
+export function requestPersistentStorage() {
+  if (
+    typeof navigator !== 'undefined' &&
+    navigator.storage &&
+    navigator.storage.persist
+  ) {
+    navigator.storage.persisted().then((persisted) => {
+      if (!persisted) {
+        navigator.storage.persist().then((granted) => {
+          if (granted) {
+            console.log('Storage persistence granted successfully.');
+          } else {
+            console.warn('Storage persistence not granted by browser.');
+          }
+        }).catch((err) => {
+          console.error('Error requesting storage persistence:', err);
+        });
+      } else {
+        console.log('Storage is already persistent.');
+      }
+    });
+  }
 }
 
 const memoryStorage: Record<string, string> = {};
