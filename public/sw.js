@@ -1,8 +1,10 @@
-const CACHE_NAME = 'staff-attendance-v1';
+const CACHE_NAME = 'staff-attendance-v2';
 const PRE_CACHE_RESOURCES = [
   './',
   './index.html',
   './favicon.svg',
+  './icon-192.png',
+  './icon-512.png',
   './manifest.json'
 ];
 
