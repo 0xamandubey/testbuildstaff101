@@ -21,9 +21,9 @@
       "purpose": "any"
     }
   ],
-  "id": "/testbuildstaff101/",
-  "scope": "/testbuildstaff101/",
-  "start_url": "/testbuildstaff101/index.html",
+  "id": "/",
+  "scope": "/",
+  "start_url": "./index.html",
   "background_color": "#F5F5F5",
   "theme_color": "#111111",
   "display": "standalone",
