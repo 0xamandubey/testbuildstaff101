@@ -11,5 +11,14 @@ export function register() {
           console.error('ServiceWorker registration failed: ', err);
         });
     });
+
+    // Automatically reload the page when a new service worker takes over
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
   }
 }
