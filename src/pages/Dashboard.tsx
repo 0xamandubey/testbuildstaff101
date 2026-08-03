@@ -142,16 +142,6 @@ export default function Dashboard() {
           <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-550 px-1">Quick Actions</h2>
           <div className="grid grid-cols-3 gap-2">
             <button
-              onClick={() => setIsAddStaffOpen(true)}
-              className="flex flex-col items-center justify-center p-3 bg-brand-darkGray border border-zinc-800 rounded-xl active:scale-[0.97] transition-all hover:bg-zinc-800 shadow-sm text-center text-brand-lightGray"
-            >
-              <div className="w-10 h-10 rounded-full bg-brand-yellow/10 flex items-center justify-center text-brand-yellow mb-1.5">
-                <UserPlus className="w-5 h-5" />
-              </div>
-              <span className="text-[11px] font-bold">Add Staff</span>
-            </button>
-
-            <button
               onClick={() => navigate('/attendance')}
               className="flex flex-col items-center justify-center p-3 bg-brand-darkGray border border-zinc-800 rounded-xl active:scale-[0.97] transition-all hover:bg-zinc-800 shadow-sm text-center text-brand-lightGray"
             >
@@ -169,6 +159,16 @@ export default function Dashboard() {
                 <Wallet className="w-5 h-5" />
               </div>
               <span className="text-[11px] font-bold">Pay Salary</span>
+            </button>
+
+            <button
+              onClick={() => setIsAddStaffOpen(true)}
+              className="flex flex-col items-center justify-center p-3 bg-brand-darkGray border border-zinc-800 rounded-xl active:scale-[0.97] transition-all hover:bg-zinc-800 shadow-sm text-center text-brand-lightGray"
+            >
+              <div className="w-10 h-10 rounded-full bg-brand-yellow/10 flex items-center justify-center text-brand-yellow mb-1.5">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold">Add Staff</span>
             </button>
           </div>
         </div>
