@@ -17,6 +17,14 @@
     <link rel="apple-touch-icon" href="./icon-192.png" />
     
     <title>Staff Attendance & Wage Tracker</title>
+    <!-- Capture PWA install prompt -->
+    <script>
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwa-installable'));
+      });
+    </script>
   </head>
   <body class="safe-bottom safe-top">
     <div id="root"></div>

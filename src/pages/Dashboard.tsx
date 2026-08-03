@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { store, formatDateDisplay, checkStorageSupport } from '../database/db';
 import type { Employee } from '../database/db';
@@ -8,13 +8,39 @@ import Layout from '../components/Layout';
 import Modal from '../components/Modal';
 import EmployeeForm from '../components/EmployeeForm';
 import { format } from 'date-fns';
-import { UserPlus, CalendarCheck, Wallet, ChevronRight, Activity, AlertTriangle } from 'lucide-react';
+import { UserPlus, CalendarCheck, Wallet, ChevronRight, Activity, AlertTriangle, Download } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const refresh = useForceUpdate();
   const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
   const { globalTotalDue } = useAllSalaries();
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    if ((window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+    }
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handlePwaInstallable = () => {
+      if ((window as any).deferredPrompt) {
+        setDeferredPrompt((window as any).deferredPrompt);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-installable', handlePwaInstallable);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-installable', handlePwaInstallable);
+    };
+  }, []);
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const storageStatus = checkStorageSupport();
@@ -93,6 +119,32 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="space-y-6">
+        {/* PWA Install Prompt Banner */}
+        {deferredPrompt && (
+          <div className="bg-brand-yellow/10 border border-brand-yellow/30 p-4 rounded-2xl flex flex-col space-y-3 shadow-sm text-brand-lightGray">
+            <div className="flex items-center space-x-2 text-brand-yellow font-bold text-xs uppercase tracking-wider">
+              <Download className="w-5 h-5 flex-shrink-0 animate-bounce" />
+              <span>Install App on Your Phone</span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Install the app directly on your home screen for quick offline access and permanent data storage.
+            </p>
+            <button
+              onClick={async () => {
+                if (deferredPrompt) {
+                  deferredPrompt.prompt();
+                  const { outcome } = await deferredPrompt.userChoice;
+                  console.log(`User response to install: ${outcome}`);
+                  setDeferredPrompt(null);
+                }
+              }}
+              className="w-full bg-brand-yellow hover:bg-yellow-400 text-brand-black text-xs font-black uppercase py-2.5 rounded-xl transition-colors active:scale-[0.98]"
+            >
+              Install Now
+            </button>
+          </div>
+        )}
+
         {/* Storage Diagnostics Alert */}
         {!storageStatus.persistent && (
           <div className="bg-brand-danger/10 border border-brand-danger/30 p-4 rounded-2xl flex flex-col space-y-2 shadow-sm text-brand-lightGray">
