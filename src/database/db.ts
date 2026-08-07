@@ -46,6 +46,8 @@ export interface Advance {
 
 export interface Settings {
   businessName: string;
+  dateFormat?: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
+  weekStartDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0: Sunday, 1: Monday, etc.
 }
 
 // ---- Formatting Helpers ----
@@ -54,6 +56,14 @@ export function formatDateDisplay(dateStr?: string): string {
   const parts = dateStr.split('-');
   if (parts.length === 3 && parts[0].length === 4) {
     const [year, month, day] = parts;
+    const settings = store.getSettings();
+    const fmt = settings.dateFormat || 'DD/MM/YYYY';
+    if (fmt === 'MM/DD/YYYY') {
+      return `${month}/${day}/${year}`;
+    }
+    if (fmt === 'YYYY-MM-DD') {
+      return `${year}-${month}-${day}`;
+    }
     return `${day}/${month}/${year}`;
   }
   return dateStr;
@@ -334,7 +344,12 @@ export const store = {
 
   // ============ SETTINGS ============
   getSettings(): Settings {
-    return load<Settings>(KEYS.settings, { businessName: 'Staff Attendance' });
+    const raw = load<Partial<Settings>>(KEYS.settings, {});
+    return {
+      businessName: raw.businessName || 'Staff Attendance',
+      dateFormat: raw.dateFormat || 'DD/MM/YYYY',
+      weekStartDay: raw.weekStartDay !== undefined ? raw.weekStartDay : 1,
+    };
   },
 
   updateSettings(updates: Partial<Settings>): void {

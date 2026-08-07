@@ -235,7 +235,7 @@ export default function Dashboard() {
           <div className="bg-brand-darkGray rounded-2xl border border-zinc-800 shadow-sm divide-y divide-zinc-800 overflow-hidden">
             <div className="p-3 bg-brand-black flex justify-between items-center border-b border-zinc-800">
               <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Date</span>
-              <span className="text-xs font-bold text-zinc-300">{format(new Date(), 'dd/MM/yyyy')}</span>
+              <span className="text-xs font-bold text-zinc-300">{formatDateDisplay(format(new Date(), 'yyyy-MM-dd'))}</span>
             </div>
 
             {recentAttendance.length > 0 ? (

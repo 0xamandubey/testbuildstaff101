@@ -50,12 +50,14 @@ export default function HistoryPage() {
   const getBounds = (): { start: string; end: string } => {
     const today = new Date();
     const todayStr = format(today, 'yyyy-MM-dd');
+    const settings = store.getSettings();
+    const weekStartsOn = (settings.weekStartDay !== undefined ? Number(settings.weekStartDay) : 1) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
     switch (filter) {
       case 'today': return { start: todayStr, end: todayStr };
       case 'week': return {
-        start: format(startOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
-        end: format(endOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+        start: format(startOfWeek(today, { weekStartsOn }), 'yyyy-MM-dd'),
+        end: format(endOfWeek(today, { weekStartsOn }), 'yyyy-MM-dd'),
       };
       case 'month': return {
         start: format(startOfMonth(today), 'yyyy-MM-dd'),

@@ -9,13 +9,16 @@ import {
   Upload,
   Building2,
   AlertTriangle,
-  Info
+  Info,
+  Sliders
 } from 'lucide-react';
 
 export default function Settings() {
   const refresh = useForceUpdate();
   const settings = store.getSettings();
   const [bName, setBName] = useState(settings.businessName);
+  const [dateFormat, setDateFormat] = useState(settings.dateFormat || 'DD/MM/YYYY');
+  const [weekStartDay, setWeekStartDay] = useState(settings.weekStartDay !== undefined ? settings.weekStartDay : 1);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const storageStatus = checkStorageSupport();
@@ -30,6 +33,20 @@ export default function Settings() {
     if (!bName.trim()) return;
     store.updateSettings({ businessName: bName.trim() });
     showToast('Business name updated!');
+    refresh();
+  };
+
+  const handleUpdateDateFormat = (val: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD') => {
+    setDateFormat(val);
+    store.updateSettings({ dateFormat: val });
+    showToast('Date format updated!');
+    refresh();
+  };
+
+  const handleUpdateWeekStartDay = (val: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
+    setWeekStartDay(val);
+    store.updateSettings({ weekStartDay: val });
+    showToast('Week start day updated!');
     refresh();
   };
 
@@ -155,6 +172,46 @@ export default function Settings() {
               Update Name
             </button>
           </form>
+        </div>
+
+        {/* Preference Settings */}
+        <div className="bg-brand-darkGray p-5 rounded-2xl border border-zinc-800 shadow-sm space-y-4">
+          <div className="flex items-center space-x-2 border-b border-zinc-700 pb-3">
+            <Sliders className="w-5 h-5 text-zinc-500" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Preferences</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex flex-col space-y-1">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Date Format</label>
+              <select
+                value={dateFormat}
+                onChange={(e) => handleUpdateDateFormat(e.target.value as any)}
+                className="w-full px-3 py-2 bg-brand-black border border-zinc-700 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-yellow h-[44px] text-white"
+              >
+                <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 07/08/2026)</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 08/07/2026)</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD (e.g. 2026-08-07)</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Week Start Day</label>
+              <select
+                value={weekStartDay}
+                onChange={(e) => handleUpdateWeekStartDay(Number(e.target.value) as any)}
+                className="w-full px-3 py-2 bg-brand-black border border-zinc-700 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-yellow h-[44px] text-white"
+              >
+                <option value={0}>Sunday</option>
+                <option value={1}>Monday</option>
+                <option value={2}>Tuesday</option>
+                <option value={3}>Wednesday</option>
+                <option value={4}>Thursday</option>
+                <option value={5}>Friday</option>
+                <option value={6}>Saturday</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Backup */}
