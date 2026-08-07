@@ -6,6 +6,7 @@ import { useEmployeeSalary } from '../hooks/useSalary';
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import Layout from '../components/Layout';
 import Modal from '../components/Modal';
+import PaymentForm from '../components/PaymentForm';
 import {
   format,
   startOfWeek,
@@ -13,7 +14,7 @@ import {
   startOfMonth,
   endOfMonth,
 } from 'date-fns';
-import { Search, CreditCard, ClipboardCheck, Plus, CheckCircle2, User, Wallet } from 'lucide-react';
+import { Search, CreditCard, ClipboardCheck, Plus, CheckCircle2, User, Wallet, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 type FilterType = 'today' | 'week' | 'month' | 'custom-date' | 'custom-range';
@@ -40,6 +41,11 @@ export default function HistoryPage() {
   const [payMethod, setPayMethod] = useState<'Cash' | 'UPI' | 'Bank'>('Cash');
   const [payRemarks, setPayRemarks] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Edit/Delete Payment state
+  const [selectedPayment, setSelectedPayment] = useState<any | null>(null);
+  const [isEditPaymentOpen, setIsEditPaymentOpen] = useState(false);
+  const [isDeletePaymentConfirmOpen, setIsDeletePaymentConfirmOpen] = useState(false);
 
   const getBounds = (): { start: string; end: string } => {
     const today = new Date();
@@ -240,6 +246,15 @@ export default function HistoryPage() {
     setToastMessage('Payment logged successfully!');
     setTimeout(() => setToastMessage(null), 2500);
     refresh();
+  };
+
+  const handleDeletePaymentConfirm = () => {
+    if (selectedPayment) {
+      store.deletePayment(selectedPayment.id);
+      setIsDeletePaymentConfirmOpen(false);
+      setSelectedPayment(null);
+      refresh();
+    }
   };
 
   return (
@@ -473,9 +488,37 @@ export default function HistoryPage() {
                         {log.paymentDate} • {log.paymentMethod} {log.remarks ? `• ${log.remarks}` : ''}
                       </span>
                     </div>
-                    <span className="text-xs font-black text-brand-success bg-green-955/30 border border-green-900 px-2 py-0.5 rounded flex-shrink-0">
-                      ₹ {log.amount}
-                    </span>
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                      <span className="text-xs font-black text-brand-success bg-green-955/30 border border-green-900 px-2 py-0.5 rounded">
+                        ₹ {log.amount}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const rawPay = paymentRecords.find(p => p.id === log.id);
+                          if (rawPay) {
+                            setSelectedPayment(rawPay);
+                            setIsEditPaymentOpen(true);
+                          }
+                        }}
+                        className="p-1 text-zinc-400 hover:text-white rounded hover:bg-zinc-800 active:scale-90 transition-transform"
+                        title="Edit payment"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const rawPay = paymentRecords.find(p => p.id === log.id);
+                          if (rawPay) {
+                            setSelectedPayment(rawPay);
+                            setIsDeletePaymentConfirmOpen(true);
+                          }
+                        }}
+                        className="p-1 text-zinc-400 hover:text-brand-danger rounded hover:bg-zinc-800 active:scale-90 transition-transform"
+                        title="Delete payment"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-brand-danger/80" />
+                      </button>
+                    </div>
                   </div>
                 );
               }
@@ -614,6 +657,47 @@ export default function HistoryPage() {
             >
               Record Payment
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={isEditPaymentOpen} onClose={() => { setIsEditPaymentOpen(false); setSelectedPayment(null); }} title="Edit Salary Payment">
+        {selectedPayment && (
+          <PaymentForm
+            employeeName={employeeMap.get(selectedPayment.employeeId)?.name || 'Staff'}
+            currentDue={
+              store.getAttendanceByEmployee(selectedPayment.employeeId).reduce((sum, r) => sum + r.value * r.dailyWage, 0) -
+              store.getPaymentsByEmployee(selectedPayment.employeeId).reduce((sum, p) => sum + p.amount, 0)
+            }
+            initialData={selectedPayment}
+            onSubmit={(data) => {
+              store.updatePayment(selectedPayment.id, {
+                amount: data.amount,
+                paymentDate: data.paymentDate,
+                paymentMethod: data.paymentMethod,
+                remarks: data.remarks || undefined,
+              });
+              setIsEditPaymentOpen(false);
+              setSelectedPayment(null);
+              refresh();
+            }}
+            onCancel={() => { setIsEditPaymentOpen(false); setSelectedPayment(null); }}
+          />
+        )}
+      </Modal>
+
+      <Modal isOpen={isDeletePaymentConfirmOpen} onClose={() => { setIsDeletePaymentConfirmOpen(false); setSelectedPayment(null); }} title="Confirm Payment Deletion">
+        <div className="space-y-4 text-brand-lightGray">
+          <div className="flex items-center space-x-2 text-brand-danger bg-red-955/30 p-3 rounded-lg border border-red-900">
+            <AlertTriangle className="w-6 h-6 flex-shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider">Destructive Action</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Are you sure you want to delete this payment of <strong>₹{selectedPayment?.amount}</strong> made on <strong>{selectedPayment ? formatDateDisplay(selectedPayment.paymentDate) : ''}</strong>? This <strong>cannot be undone</strong>.
+          </p>
+          <div className="flex space-x-3 pt-2">
+            <button onClick={() => { setIsDeletePaymentConfirmOpen(false); setSelectedPayment(null); }} className="flex-1 py-3 bg-zinc-800 text-brand-lightGray font-semibold rounded-xl text-xs uppercase tracking-wider active:scale-[0.98] transition-transform">Cancel</button>
+            <button onClick={handleDeletePaymentConfirm} className="flex-1 py-3 bg-brand-danger text-white font-extrabold rounded-xl text-xs uppercase tracking-wider active:scale-[0.98] transition-transform">Delete</button>
           </div>
         </div>
       </Modal>
