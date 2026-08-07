@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { store, formatDateDisplay } from '../database/db';
+import type { SalaryPayment } from '../database/db';
 import { useEmployeeSalary } from '../hooks/useSalary';
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import Layout from '../components/Layout';
@@ -28,6 +29,10 @@ export default function EmployeeDetails() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  const [selectedPayment, setSelectedPayment] = useState<SalaryPayment | null>(null);
+  const [isEditPaymentOpen, setIsEditPaymentOpen] = useState(false);
+  const [isDeletePaymentConfirmOpen, setIsDeletePaymentConfirmOpen] = useState(false);
 
   const employee = empId !== undefined ? store.getEmployee(empId) : undefined;
   const salary = useEmployeeSalary(empId);
@@ -90,6 +95,34 @@ export default function EmployeeDetails() {
     });
     setIsPaymentOpen(false);
     refresh();
+  };
+
+  const handleEditPaymentSubmit = (data: {
+    amount: number;
+    paymentDate: string;
+    paymentMethod: 'Cash' | 'UPI' | 'Bank';
+    remarks?: string;
+  }) => {
+    if (selectedPayment) {
+      store.updatePayment(selectedPayment.id, {
+        amount: data.amount,
+        paymentDate: data.paymentDate,
+        paymentMethod: data.paymentMethod,
+        remarks: data.remarks || undefined,
+      });
+      setIsEditPaymentOpen(false);
+      setSelectedPayment(null);
+      refresh();
+    }
+  };
+
+  const handleDeletePaymentConfirm = () => {
+    if (selectedPayment) {
+      store.deletePayment(selectedPayment.id);
+      setIsDeletePaymentConfirmOpen(false);
+      setSelectedPayment(null);
+      refresh();
+    }
   };
 
   const handleToggleArchive = () => {
@@ -253,7 +286,29 @@ export default function EmployeeDetails() {
                   <div key={p.id} className="p-2.5 flex flex-col justify-between space-y-1">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-extrabold text-white">{formatDateDisplay(p.paymentDate)}</span>
-                      <span className="text-[10px] font-extrabold text-brand-success">₹{p.amount}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] font-extrabold text-brand-success">₹{p.amount}</span>
+                        <button
+                          onClick={() => {
+                            setSelectedPayment(p);
+                            setIsEditPaymentOpen(true);
+                          }}
+                          className="p-1 text-zinc-400 hover:text-white rounded hover:bg-zinc-800 active:scale-90 transition-transform"
+                          title="Edit payment"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedPayment(p);
+                            setIsDeletePaymentConfirmOpen(true);
+                          }}
+                          className="p-1 text-zinc-400 hover:text-brand-danger rounded hover:bg-zinc-800 active:scale-90 transition-transform"
+                          title="Delete payment"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-brand-danger/80" />
+                        </button>
+                      </div>
                     </div>
                     <div className="text-[8px] font-bold text-zinc-500 truncate uppercase">
                       {p.paymentMethod} {p.remarks ? `• ${p.remarks}` : ''}
@@ -304,7 +359,7 @@ export default function EmployeeDetails() {
 
       <Modal isOpen={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)} title="Confirm Deletion">
         <div className="space-y-4 text-brand-lightGray">
-          <div className="flex items-center space-x-2 text-brand-danger bg-red-950/30 p-3 rounded-lg border border-red-900">
+          <div className="flex items-center space-x-2 text-brand-danger bg-red-955/30 p-3 rounded-lg border border-red-900">
             <AlertTriangle className="w-6 h-6 flex-shrink-0" />
             <span className="text-xs font-bold uppercase tracking-wider">Destructive Action</span>
           </div>
@@ -314,6 +369,34 @@ export default function EmployeeDetails() {
           <div className="flex space-x-3 pt-2">
             <button onClick={() => setIsDeleteConfirmOpen(false)} className="flex-1 py-3 bg-zinc-800 text-brand-lightGray font-semibold rounded-xl text-xs uppercase tracking-wider active:scale-[0.98] transition-transform">Cancel</button>
             <button onClick={handlePermanentDelete} className="flex-1 py-3 bg-brand-danger text-white font-extrabold rounded-xl text-xs uppercase tracking-wider active:scale-[0.98] transition-transform">Delete</button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={isEditPaymentOpen} onClose={() => { setIsEditPaymentOpen(false); setSelectedPayment(null); }} title="Edit Salary Payment">
+        {selectedPayment && (
+          <PaymentForm
+            employeeName={employee.name}
+            currentDue={salary.remainingDue}
+            initialData={selectedPayment}
+            onSubmit={handleEditPaymentSubmit}
+            onCancel={() => { setIsEditPaymentOpen(false); setSelectedPayment(null); }}
+          />
+        )}
+      </Modal>
+
+      <Modal isOpen={isDeletePaymentConfirmOpen} onClose={() => { setIsDeletePaymentConfirmOpen(false); setSelectedPayment(null); }} title="Confirm Payment Deletion">
+        <div className="space-y-4 text-brand-lightGray">
+          <div className="flex items-center space-x-2 text-brand-danger bg-red-955/30 p-3 rounded-lg border border-red-900">
+            <AlertTriangle className="w-6 h-6 flex-shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider">Destructive Action</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Are you sure you want to delete this payment of <strong>₹{selectedPayment?.amount}</strong> made on <strong>{selectedPayment ? formatDateDisplay(selectedPayment.paymentDate) : ''}</strong>? This <strong>cannot be undone</strong>.
+          </p>
+          <div className="flex space-x-3 pt-2">
+            <button onClick={() => { setIsDeletePaymentConfirmOpen(false); setSelectedPayment(null); }} className="flex-1 py-3 bg-zinc-800 text-brand-lightGray font-semibold rounded-xl text-xs uppercase tracking-wider active:scale-[0.98] transition-transform">Cancel</button>
+            <button onClick={handleDeletePaymentConfirm} className="flex-1 py-3 bg-brand-danger text-white font-extrabold rounded-xl text-xs uppercase tracking-wider active:scale-[0.98] transition-transform">Delete</button>
           </div>
         </div>
       </Modal>

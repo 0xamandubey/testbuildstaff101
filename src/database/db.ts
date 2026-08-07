@@ -263,6 +263,20 @@ export const store = {
     save(KEYS.payments, this.getPayments().filter(p => p.employeeId !== employeeId));
   },
 
+  updatePayment(id: number, updates: Partial<Omit<SalaryPayment, 'id' | 'employeeId'>>): void {
+    const all = this.getPayments();
+    const idx = all.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      all[idx] = { ...all[idx], ...updates };
+      save(KEYS.payments, all);
+    }
+  },
+
+  deletePayment(id: number): void {
+    const all = this.getPayments();
+    save(KEYS.payments, all.filter(p => p.id !== id));
+  },
+
   // ============ ADVANCES ============
   getAdvances(): Advance[] {
     const raw = load<Advance[]>(KEYS.advances, []);

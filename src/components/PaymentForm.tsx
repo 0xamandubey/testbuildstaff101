@@ -17,15 +17,30 @@ interface PaymentFormProps {
   currentDue: number;
   onSubmit: (data: PaymentFormValues) => void;
   onCancel: () => void;
+  initialData?: {
+    amount: number;
+    paymentDate: string;
+    paymentMethod: 'Cash' | 'UPI' | 'Bank';
+    remarks?: string;
+  };
 }
 
-export default function PaymentForm({ employeeName, currentDue, onSubmit, onCancel }: PaymentFormProps) {
-  const defaultValues: PaymentFormValues = {
-    amount: currentDue > 0 ? currentDue : '' as unknown as number,
-    paymentDate: format(new Date(), 'yyyy-MM-dd'),
-    paymentMethod: 'Cash',
-    remarks: '',
-  };
+export default function PaymentForm({ employeeName, currentDue, onSubmit, onCancel, initialData }: PaymentFormProps) {
+  const adjustedDue = initialData ? currentDue + initialData.amount : currentDue;
+
+  const defaultValues: PaymentFormValues = initialData
+    ? {
+        amount: initialData.amount,
+        paymentDate: initialData.paymentDate,
+        paymentMethod: initialData.paymentMethod,
+        remarks: initialData.remarks || '',
+      }
+    : {
+        amount: currentDue > 0 ? currentDue : '' as unknown as number,
+        paymentDate: format(new Date(), 'yyyy-MM-dd'),
+        paymentMethod: 'Cash',
+        remarks: '',
+      };
 
   const {
     register,
@@ -45,8 +60,8 @@ export default function PaymentForm({ employeeName, currentDue, onSubmit, onCanc
         <div className="font-bold text-base truncate text-white">{employeeName}</div>
         <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-800">
           <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Remaining Due</span>
-          <span className={`text-sm font-extrabold ${currentDue > 0 ? 'text-brand-danger' : 'text-brand-success'}`}>
-            ₹ {currentDue.toFixed(2)}
+          <span className={`text-sm font-extrabold ${adjustedDue > 0 ? 'text-brand-danger' : 'text-brand-success'}`}>
+            ₹ {adjustedDue.toFixed(2)}
           </span>
         </div>
       </div>
@@ -57,13 +72,13 @@ export default function PaymentForm({ employeeName, currentDue, onSubmit, onCanc
           <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">
             Amount To Pay <span className="text-brand-danger">*</span>
           </label>
-          {currentDue > 0 && (
+          {adjustedDue > 0 && (
             <button
               type="button"
-              onClick={() => setValue('amount', currentDue)}
+              onClick={() => setValue('amount', adjustedDue)}
               className="text-[10px] font-extrabold text-brand-yellow bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded uppercase active:scale-95 transition-transform"
             >
-              Pay Full Due
+              {initialData ? 'Use Original Due' : 'Pay Full Due'}
             </button>
           )}
         </div>
